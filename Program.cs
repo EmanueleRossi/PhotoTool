@@ -28,13 +28,16 @@ namespace PhotoTool
                         MainLogger.Verbose($"Analyzing file {file}");                                                              
                         if (args?.Length > 1)
                         {
-                            if(FitsMask(file, args[1]))
+                            // FIXME
+                            if(file.Contains(args[1]))
                             {         
                                 MainLogger.Information($"Processing...");                                                                                                
                                 if (string.Equals(Path.GetExtension(file), ".xmp", StringComparison.OrdinalIgnoreCase))
                                 {
-                                    XMPToImageCopier copier = new XMPToImageCopier(new FileInfo(file));
-                                    copier.copyDateCreatedToDateTimeOriginal();                                                                                                 
+                                    FileInfo xmpFileInfo = new FileInfo(file);
+                                    XMPToImageCopier copier = new XMPToImageCopier(xmpFileInfo);
+                                    copier.copyDateCreatedToDateTimeOriginal();      
+                                    File.Move(file, Path.ChangeExtension(xmpFileInfo.FullName, ".xmp.done"), true);
                                 }
                                 else
                                 {

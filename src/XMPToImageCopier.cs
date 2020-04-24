@@ -40,7 +40,7 @@ namespace PhotoTool
                         Program.MainLogger.Error($"exifToolError {exifToolError}");  
                     string exifToolOutput = process.StandardOutput.ReadToEnd().Replace(Environment.NewLine, "");                    
                     if (!string.IsNullOrEmpty(exifToolOutput)) 
-                        Program.MainLogger.Verbose($"exifToolOutput {exifToolOutput}");                      
+                        Program.MainLogger.Information($"exifToolOutput {exifToolOutput}");                      
 
                     process.WaitForExit();   
                 }
