@@ -35,11 +35,11 @@ namespace PhotoTool
                     process.StartInfo.RedirectStandardError = true;
                     process.Start();
 
-                    string exifToolError = process.StandardError.ReadToEnd();
+                    string exifToolError = process.StandardError.ReadToEnd().Replace(Environment.NewLine, "");
                     if (!string.IsNullOrEmpty(exifToolError)) 
                         Program.MainLogger.Error($"exifToolError {exifToolError}");  
-                    string exifToolOutput = process.StandardOutput.ReadToEnd();                    
-                    if (!string.IsNullOrEmpty(exifToolError)) 
+                    string exifToolOutput = process.StandardOutput.ReadToEnd().Replace(Environment.NewLine, "");                    
+                    if (!string.IsNullOrEmpty(exifToolOutput)) 
                         Program.MainLogger.Verbose($"exifToolOutput {exifToolOutput}");                      
 
                     process.WaitForExit();   

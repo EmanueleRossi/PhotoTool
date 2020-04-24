@@ -1,7 +1,10 @@
 ﻿using Serilog;
 using Serilog.Core;
+using Serilog.Sinks.SystemConsole.Themes;
 using System;
 using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace PhotoTool
 {
@@ -9,47 +12,65 @@ namespace PhotoTool
     {
         public static Logger MainLogger = new LoggerConfiguration()
             .Enrich.FromLogContext()
-            .MinimumLevel.Debug()
+            .MinimumLevel.Verbose()            
             .WriteTo.Console()
             .CreateLogger();
 
         static void Main(string[] args)
-        {            
-            if (args.Length != 0)
-            {
-                if (!string.IsNullOrWhiteSpace(args[0]))
-                {
+        {           
+            try
+            { 
+                if (args?.Length > 0)
+                {                    
                     string[] files = Directory.GetFiles(args[0]);
                     foreach (string file in files) 
-                    {
-                        try
+                    {                        
+                        MainLogger.Information(Environment.NewLine);                                                              
+                        MainLogger.Information($"Processing file {file}");                                                              
+                        if (args?.Length > 1)
                         {
-                            Log.Information($"Processing file {file}");                
-                            if (string.Equals(Path.GetExtension(file), ".xmp", StringComparison.OrdinalIgnoreCase))
-                            {
-                                XMPToImageCopier copier = new XMPToImageCopier(new FileInfo(file));
-                                copier.copyDateCreatedToDateTimeOriginal();                                                                                                 
-                            }
+                            if(FitsMask(file, args[1]))
+                            {                                                                                                        
+                                if (string.Equals(Path.GetExtension(file), ".xmp", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    XMPToImageCopier copier = new XMPToImageCopier(new FileInfo(file));
+                                    copier.copyDateCreatedToDateTimeOriginal();                                                                                                 
+                                }
+                                else
+                                {
+                                    MainLogger.Information($"Not an XMP file!");                
+                                }     
+                            } 
                             else
                             {
-                                Log.Information($"Not an XMP file!");                
-                            }    
-                        } 
-                        catch (Exception ex)
+                                MainLogger.Information($"File {file} does not matches pattern {args[1]}.");   
+                            }                                                         
+                        }
+                        else
                         {
-                            MainLogger.Error($"Exception :(", ex);     
-                        }        
+                            MainLogger.Error($"Parameter #2 is needed!");                   
+                        }
                     }  
                 }
                 else
                 {
-                    MainLogger.Error($"First parameter cannot be empty!");   
-                }
-            }
-            else
+                    MainLogger.Error($"Parameter #1 is needed!");                   
+                }          
+            } 
+            catch (Exception ex) 
             {
-                MainLogger.Error($"At least one parameter is needed!");                   
-            }          
+                MainLogger.Fatal("Error :(", ex);
+            }
+            finally
+            {
+                MainLogger.Dispose();
+            }            
         }
+
+        private static bool FitsMask(string fileName, string fileMask)
+        {
+            Regex mask = new Regex('^' + fileMask.Replace(".", "[.]").Replace("*", ".*").Replace("?", ".") + '$', RegexOptions.IgnoreCase);
+            return mask.IsMatch(fileName);
+        }   
     }
 }
