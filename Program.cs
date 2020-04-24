@@ -12,7 +12,7 @@ namespace PhotoTool
     {
         public static Logger MainLogger = new LoggerConfiguration()
             .Enrich.FromLogContext()
-            .MinimumLevel.Verbose()            
+            .MinimumLevel.Information()            
             .WriteTo.Console()
             .CreateLogger();
 
@@ -25,12 +25,13 @@ namespace PhotoTool
                     string[] files = Directory.GetFiles(args[0]);
                     foreach (string file in files) 
                     {                        
-                        MainLogger.Information(Environment.NewLine);                                                              
-                        MainLogger.Information($"Processing file {file}");                                                              
+                        MainLogger.Verbose(Environment.NewLine);                                                              
+                        MainLogger.Verbose($"Analyzing file {file}");                                                              
                         if (args?.Length > 1)
                         {
                             if(FitsMask(file, args[1]))
-                            {                                                                                                        
+                            {         
+                                MainLogger.Information($"Processing...");                                                                                                
                                 if (string.Equals(Path.GetExtension(file), ".xmp", StringComparison.OrdinalIgnoreCase))
                                 {
                                     XMPToImageCopier copier = new XMPToImageCopier(new FileInfo(file));
@@ -43,7 +44,7 @@ namespace PhotoTool
                             } 
                             else
                             {
-                                MainLogger.Information($"File {file} does not matches pattern {args[1]}.");   
+                                MainLogger.Verbose($"File {file} does not matches pattern {args[1]}.");   
                             }                                                         
                         }
                         else
