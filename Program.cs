@@ -11,7 +11,6 @@ namespace PhotoTool
     class Program
     {
         public static Logger MainLogger = new LoggerConfiguration()
-            .Enrich.FromLogContext()
             .MinimumLevel.Information()            
             .WriteTo.Console()
             .CreateLogger();
