@@ -1,10 +1,9 @@
 ﻿using Serilog;
 using Serilog.Core;
-using Serilog.Sinks.SystemConsole.Themes;
 using System;
 using System.IO;
-using System.Linq;
 using System.Text.RegularExpressions;
+using PhotoTool.Copier;
 
 namespace PhotoTool
 {
@@ -62,7 +61,7 @@ namespace PhotoTool
             } 
             catch (Exception ex) 
             {
-                MainLogger.Fatal("Error :(", ex);
+                MainLogger.Fatal($"Error :( {ex.Message} {ex.StackTrace}");
             }
             finally
             {
