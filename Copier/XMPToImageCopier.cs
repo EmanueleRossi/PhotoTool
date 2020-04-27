@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using PhotoTool.Shared;
 using XmpCore;
 
 namespace PhotoTool.Copier
@@ -42,8 +43,8 @@ namespace PhotoTool.Copier
                         process.Start();
 
                         string exifToolError = process.StandardError.ReadToEnd().Replace(Environment.NewLine, "");
-                        if (!string.IsNullOrEmpty(exifToolError)) 
-                            Program.MainLogger.Error($"exifToolError {exifToolError}");  
+                        if (!string.IsNullOrEmpty(exifToolError)) throw new ExifToolException(exifToolError);
+
                         string exifToolOutput = process.StandardOutput.ReadToEnd().Replace(Environment.NewLine, "");                    
                         if (!string.IsNullOrEmpty(exifToolOutput)) 
                             Program.MainLogger.Information($"exifToolOutput {exifToolOutput}");                      
@@ -97,24 +98,5 @@ namespace PhotoTool.Copier
             string imageFileExtension = supportedExtensions.Where(e => File.Exists(Path.ChangeExtension(XmpFile.FullName, e))).Single();
             return new FileInfo(Path.ChangeExtension(XmpFile.FullName, imageFileExtension));
         }        
-
-        public class DateTimeConverterUsingDateTimeParseAsFallback : JsonConverter<DateTime>
-        {
-            private const string customFormat = "yyyy:MM:dd HH:mm:ss"; 
-            public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-            {
-                if (!reader.TryGetDateTime(out DateTime value))
-                {
-                    Program.MainLogger.Verbose($"Trying to parse {reader.GetString()}"); 
-                    value = DateTime.ParseExact(reader.GetString(), customFormat, CultureInfo.InvariantCulture);
-                }
-                return value;
-            }
-
-            public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options)
-            {
-                writer.WriteStringValue(value.ToString(customFormat));
-            }
-        }
     }
 }

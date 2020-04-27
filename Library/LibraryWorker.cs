@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using PhotoTool.Shared;
 
 namespace PhotoTool.Library
 {
@@ -48,9 +49,8 @@ namespace PhotoTool.Library
         {
             LibraryImage libraryImage = new LibraryImage();            
             string fileFullPath = Path.GetFullPath(imageFilePath);                 
-            libraryImage.fileFullPath = fileFullPath;
+            libraryImage.FileFullPath = fileFullPath;
             string extension = Path.GetExtension(imageFilePath).ToLower();        
-            libraryImage.fileExtension = extension;            
             if (supportedExtensions.Contains(extension)) 
             {
                 try
@@ -62,46 +62,39 @@ namespace PhotoTool.Library
                     process.StartInfo.RedirectStandardOutput = true;
                     process.StartInfo.RedirectStandardError = true;
                     process.Start();
-                    string jOutput = process.StandardOutput.ReadToEnd();
-                    if (!string.IsNullOrEmpty(jOutput))                    
+
+                    string exifToolError = process.StandardError.ReadToEnd().Replace(Environment.NewLine, "");
+                    if (!string.IsNullOrEmpty(exifToolError)) throw new ExifToolException(exifToolError);
+
+                    string exifToolOutput = process.StandardOutput.ReadToEnd();
+                    if (!string.IsNullOrEmpty(exifToolOutput))                    
                     {
-                        JsonDocument jsonOutput = JsonDocument.Parse(jOutput);
-
-                        bool hasCreateDateJsonElement =  jsonOutput.RootElement.EnumerateArray().ElementAtOrDefault(0).TryGetProperty("CreateDate", out JsonElement CreateDateJsonElement);
-                        if (hasCreateDateJsonElement) 
-                            libraryImage.photoDate = DateTime.ParseExact(CreateDateJsonElement.GetString(), "yyyy:MM:dd HH:mm:ss", CultureInfo.InvariantCulture);
-
-                        bool hasGPSLatitudeJsonElement = jsonOutput.RootElement.EnumerateArray().ElementAtOrDefault(0).TryGetProperty("GPSLatitude", out JsonElement GPSLatitudeJsonElement);
-                        if (hasGPSLatitudeJsonElement)
-                            libraryImage.latitude = GPSLatitudeJsonElement.GetString();
-
-                        bool hasGPSLongitudeJsonElement = jsonOutput.RootElement.EnumerateArray().ElementAtOrDefault(0).TryGetProperty("GPSLatitude", out JsonElement GPSLongitudeJsonElement);
-                        if (hasGPSLongitudeJsonElement)
-                            libraryImage.longitude = GPSLongitudeJsonElement.GetString();
-
-                        bool hasGPSAltitudeJsonElement = jsonOutput.RootElement.EnumerateArray().ElementAtOrDefault(0).TryGetProperty("GPSAltitude", out JsonElement GPSAltitudeJsonElement);
-                        if (hasGPSAltitudeJsonElement)
-                            libraryImage.altitude = GPSAltitudeJsonElement.GetString();                                                                                   
-                    }
-                    string err = process.StandardError.ReadToEnd();
-                    if (!string.IsNullOrEmpty(err)) 
-                        Console.WriteLine(err);                      
+                        Program.MainLogger.Debug($"exifToolOutput {exifToolOutput}");
+                        JsonSerializerOptions serializerOptions = new JsonSerializerOptions();
+                        serializerOptions.Converters.Add(new DateTimeConverterUsingDateTimeParseAsFallback());
+                        ExifToolResponse jsonExifToolOutput = JsonSerializer.Deserialize<ExifToolResponse[]>(exifToolOutput, serializerOptions).First();                
+                        libraryImage.PhotoDate = jsonExifToolOutput.CreateDate;
+                        libraryImage.Latitude = jsonExifToolOutput.GPSLatitude;
+                        libraryImage.Longitude = jsonExifToolOutput.GPSLongitude;
+                        libraryImage.Altitude = jsonExifToolOutput.GPSAltitude;                                                                                 
+                    }                     
+                                                    
                     process.WaitForExit();   
 
-                    if (File.Exists(Path.ChangeExtension(fileFullPath, ".json"))
+                    if (File.Exists(Path.ChangeExtension(fileFullPath, ".json")))
                     {
-                        libraryImage.metadataFileFullPath = fileFullPath + ".json";
+                        libraryImage.MetadataFileFullPath = fileFullPath + ".json";
                         var jsonMetadataString = File.ReadAllText(fileFullPath + ".json");
                         JsonDocument jsonMetadata = JsonDocument.Parse(jsonMetadataString);
                         
                         DateTime datetimeBegin = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
                         double offset = Convert.ToDouble(jsonMetadata.RootElement.GetProperty("photoTakenTime").GetProperty("timestamp").GetString());
-                        libraryImage.metadataPhotoTakenTime = datetimeBegin.AddSeconds(offset).ToLocalTime();
+                        libraryImage.MetadataPhotoTakenTime = datetimeBegin.AddSeconds(offset).ToLocalTime();
                         
-                        libraryImage.metatdataLatitude = jsonMetadata.RootElement.GetProperty("geoData").GetProperty("latitude").GetDouble();
-                        libraryImage.metatdataLatitudeExif = jsonMetadata.RootElement.GetProperty("geoDataExif").GetProperty("latitude").GetDouble();
-                        libraryImage.metatdataLongitude = jsonMetadata.RootElement.GetProperty("geoData").GetProperty("longitude").GetDouble();
-                        libraryImage.metatdataLongitudeExif = jsonMetadata.RootElement.GetProperty("geoDataExif").GetProperty("longitude").GetDouble();                    
+                        libraryImage.MetatdataLatitude = jsonMetadata.RootElement.GetProperty("geoData").GetProperty("latitude").GetDouble();
+                        libraryImage.MetatdataLatitudeExif = jsonMetadata.RootElement.GetProperty("geoDataExif").GetProperty("latitude").GetDouble();
+                        libraryImage.MetatdataLongitude = jsonMetadata.RootElement.GetProperty("geoData").GetProperty("longitude").GetDouble();
+                        libraryImage.MetatdataLongitudeExif = jsonMetadata.RootElement.GetProperty("geoDataExif").GetProperty("longitude").GetDouble();                    
                     }    
                     libraryImages.Add(libraryImage);                
                 } 

@@ -4,18 +4,17 @@ namespace PhotoTool.Library
 {
     public class LibraryImage
     {
-        public string fileFullPath { get; set; }
-        public string fileExtension { get; set; } 
+        public string FileFullPath { get; set; }
 
-        public DateTime? photoDate { get; set; }
-        public string latitude { get; set; }    
-        public string longitude { get; set; }
-        public string altitude { get; set; }  
-        public string metadataFileFullPath { get; set; }        
-        public DateTime? metadataPhotoTakenTime { get; set; }
-        public double? metatdataLatitude { get; set; }
-        public double? metatdataLongitude { get; set; }
-        public double? metatdataLatitudeExif { get; set; }
-        public double? metatdataLongitudeExif { get; set; }             
+        public DateTime? PhotoDate { get; set; }
+        public string Latitude { get; set; }    
+        public string Longitude { get; set; }
+        public string Altitude { get; set; }  
+        public string MetadataFileFullPath { get; set; }        
+        public DateTime? MetadataPhotoTakenTime { get; set; }
+        public double? MetatdataLatitude { get; set; }
+        public double? MetatdataLongitude { get; set; }
+        public double? MetatdataLatitudeExif { get; set; }
+        public double? MetatdataLongitudeExif { get; set; }             
     }
 }
