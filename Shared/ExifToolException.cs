@@ -1,5 +1,3 @@
-
-
 using System;
 
 namespace PhotoTool.Shared
@@ -14,5 +12,10 @@ namespace PhotoTool.Shared
             : base(message)
         {
         }
+
+        public ExifToolException(string message, Exception inner)
+            : base(message, inner)
+        {
+        }        
     }
 }
