@@ -12,7 +12,7 @@ namespace PhotoTool.Copier
 {
     class XMPToImageCopier
     {
-        public static readonly string[] supportedExtensions = { ".jpg", ".jpeg", ".mp4" };
+        public static readonly string[] supportedExtensions = { ".jpg", ".jpeg", ".mp4", ".mov" };
 
         private FileInfo XmpFile;
 
@@ -36,7 +36,7 @@ namespace PhotoTool.Copier
                     {
                         Process process = new Process();
                         process.StartInfo.FileName = @"exiftool.exe";
-                        process.StartInfo.Arguments = string.Concat(" -overwrite_original \"-DateTimeOriginal=", xmpMetaCreateDate.ToIso8601String(), "\"", " \"", correspondingImageFile, "\"");
+                        process.StartInfo.Arguments = string.Concat(" -m -overwrite_original \"-DateTimeOriginal=", xmpMetaCreateDate.ToIso8601String(), "\"", " \"", correspondingImageFile, "\"");
                         process.StartInfo.UseShellExecute = false;
                         process.StartInfo.RedirectStandardOutput = true;
                         process.StartInfo.RedirectStandardError = true;
@@ -67,15 +67,15 @@ namespace PhotoTool.Copier
         {
             Process process = new Process();
             process.StartInfo.FileName = @"exiftool.exe";
-            process.StartInfo.Arguments = string.Concat(" -j -DateTimeOriginal \"", imageFile, "\"");
+            process.StartInfo.Arguments = string.Concat(" -j -m -DateTimeOriginal \"", imageFile, "\"");
             process.StartInfo.UseShellExecute = false;
             process.StartInfo.RedirectStandardOutput = true;
             process.StartInfo.RedirectStandardError = true;
             process.Start();
 
             string exifToolError = process.StandardError.ReadToEnd().Replace(Environment.NewLine, "");
-            if (!string.IsNullOrEmpty(exifToolError)) 
-                Program.MainLogger.Error($"exifToolError {exifToolError}");  
+            if (!string.IsNullOrEmpty(exifToolError)) throw new ExifToolException(exifToolError);
+
             string exifToolOutput = process.StandardOutput.ReadToEnd().Replace(Environment.NewLine, "");                    
             process.WaitForExit();   
 

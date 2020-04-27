@@ -2,7 +2,6 @@
 using Serilog.Core;
 using System;
 using System.IO;
-using System.Text.RegularExpressions;
 using PhotoTool.Copier;
 
 namespace PhotoTool

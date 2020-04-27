@@ -57,7 +57,7 @@ namespace PhotoTool.Library
                 {
                     Process process = new Process();
                     process.StartInfo.FileName = @"exiftool.exe";
-                    process.StartInfo.Arguments = string.Concat(" -j -a ", "\"", fileFullPath, "\"");
+                    process.StartInfo.Arguments = string.Concat(" -j -a -m ", "\"", fileFullPath, "\"");
                     process.StartInfo.UseShellExecute = false;
                     process.StartInfo.RedirectStandardOutput = true;
                     process.StartInfo.RedirectStandardError = true;
