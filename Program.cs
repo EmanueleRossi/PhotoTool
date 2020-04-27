@@ -19,7 +19,6 @@ namespace PhotoTool
             { 
                 if (args?.Length > 0)
                 {            
-                    MainLogger.Information($"Processing fil");        
                     string[] files = Directory.GetFiles(args[0], args[1] ?? "*.*", SearchOption.TopDirectoryOnly);
                     foreach (string file in files) 
                     {                        
