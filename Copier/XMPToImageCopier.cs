@@ -38,7 +38,7 @@ namespace PhotoTool.Copier
                         }
                         else
                         {
-                            Program.MainLogger.Information($"DateTimeOriginal TAG in file {correspondingImageFile} was already set to {DateTimeOriginal}");                      
+                            Program.MainLogger.Information($"DateTimeOriginal TAG in file {correspondingImageFile} already set to {DateTimeOriginal}");                      
                         }
                     }
                 }
