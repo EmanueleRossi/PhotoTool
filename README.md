@@ -15,6 +15,7 @@ For every XMP file:
 2. looks for image file(s) (supported formats are <code>jpg, jpeg, mp4, mov, heic</code>) with the same name of the XMP file. I.e.: <code>image_01.xmp -> image_01.jpeg</code>
 3. reads file(s) EXIF informations, looking for TAG <code>DateTimeOriginal</code>;
 4. if no <code>DateTimeOriginal</code> TAG is found, overwrites it with what found at Step #01;
+5. renames XMP file to XMP.done, letting you to re-process the entire directory;
 
 # Snippets
 Count DONE objects using PowerShell:
