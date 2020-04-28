@@ -18,8 +18,13 @@ namespace PhotoTool
             try
             { 
                 if (args?.Length > 0)
-                {            
-                    string[] files = Directory.GetFiles(args[0], args[1] ?? "*.*", SearchOption.TopDirectoryOnly);
+                {
+                    string[] files = null;                    
+                    if (args?.Length == 1)
+                        files = Directory.GetFiles(args[0], "*.*", SearchOption.TopDirectoryOnly);
+                    if (args?.Length == 2)
+                        files = Directory.GetFiles(args[0], args[1], SearchOption.TopDirectoryOnly);                                    
+
                     foreach (string file in files) 
                     {                        
                         MainLogger.Verbose(Environment.NewLine);                                                              
@@ -39,7 +44,7 @@ namespace PhotoTool
                 }
                 else
                 {
-                    MainLogger.Error($"Parameter #1 is needed!");                   
+                    MainLogger.Error($"At least one parameter (working directory), is needed!");                   
                 }          
             } 
             catch (Exception ex) 
